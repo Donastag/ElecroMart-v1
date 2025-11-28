@@ -1,0 +1,9 @@
+/* Basic styles for Elecro.Mart */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
