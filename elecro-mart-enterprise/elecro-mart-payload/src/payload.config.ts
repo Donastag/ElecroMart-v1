@@ -1,6 +1,12 @@
 // storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
+// Check if database is properly configured
+const isDatabaseConfigured = () => {
+  const dbUri = process.env.DATABASE_URI
+  return dbUri && dbUri !== 'your_supabase_postgres_connection_string' && dbUri.startsWith('postgresql://')
+}
+
 import {
   BoldFeature,
   EXPERIMENTAL_TableFeature,
@@ -42,7 +48,13 @@ export default buildConfig({
   collections: [Users, Pages, Categories, Media],
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || '',
+      connectionString: process.env.DATABASE_URI || 'postgresql://dummy:dummy@localhost:5432/dummy',
+      // Add connection timeout and retry settings
+      connectionTimeoutMillis: 5000,
+      query_timeout: 10000,
+      idleTimeoutMillis: 30000,
+      max: 10,
+      min: 0,
     },
   }),
   editor: lexicalEditor({
