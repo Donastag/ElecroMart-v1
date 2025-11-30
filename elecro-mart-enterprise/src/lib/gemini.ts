@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 // Queue system to prevent rate limiting
 const requestQueue: Array<() => Promise<void>> = [];
@@ -111,6 +111,11 @@ export async function createProductEmbedding(
   embedding: number[],
   contentType: string = 'combined'
 ): Promise<boolean> {
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, skipping embedding creation');
+    return false;
+  }
+
   try {
     const vectorString = `[${embedding.join(',')}]`;
 
@@ -136,6 +141,11 @@ export async function createProductEmbedding(
 
 // Process and embed all products (for initial setup)
 export async function processAllProductsForEmbeddings(): Promise<{ success: number; failed: number }> {
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, skipping product embedding processing');
+    return { success: 0, failed: 0 };
+  }
+
   try {
     const { data: products, error } = await supabase
       .from('products')
@@ -210,6 +220,11 @@ export interface SemanticSearchResult {
 
 // Semantic product search
 export async function semanticSearch(query: string, limit: number = 20): Promise<SemanticSearchResult[]> {
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, skipping semantic search');
+    return [];
+  }
+
   try {
     // Generate embedding for the query
     const embedding = await generateEmbedding(query);
@@ -249,6 +264,11 @@ export interface ProductRecommendation {
 
 // Get product recommendations
 export async function getProductRecommendations(productId: string, limit: number = 10): Promise<ProductRecommendation[]> {
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, skipping product recommendations');
+    return [];
+  }
+
   try {
     const { data, error } = await supabase.rpc('get_product_recommendations', {
       base_product_id: productId,

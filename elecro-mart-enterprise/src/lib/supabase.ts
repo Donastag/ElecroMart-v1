@@ -1,28 +1,40 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from './database.types'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+// Create a dummy client if environment variables are not set
+const dummyUrl = 'https://dummy.supabase.co'
+const dummyKey = 'dummy-key'
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  db: {
-    schema: 'public'
-  },
-  global: {
-    headers: {
-      'x-my-custom-header': 'ElecroMart'
+export const supabase = createClient<Database>(
+  supabaseUrl || dummyUrl,
+  supabaseKey || dummyKey,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    },
+    db: {
+      schema: 'public'
+    },
+    global: {
+      headers: {
+        'x-my-custom-header': 'ElecroMart'
+      }
     }
   }
-})
+)
+
+// Check if Supabase is properly configured
+export const isSupabaseConfigured = () => {
+  return !!(supabaseUrl && supabaseKey &&
+           supabaseUrl !== 'your_supabase_project_url' &&
+           supabaseKey !== 'your_supabase_anon_key' &&
+           supabaseUrl.startsWith('https://'))
+}
 
 // Helper function to check if user is authenticated
 export const isAuthenticated = async () => {
