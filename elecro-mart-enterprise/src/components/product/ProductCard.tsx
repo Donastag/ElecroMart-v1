@@ -4,13 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Star, ShoppingCart, Heart, Sparkles, Loader2, ImageOff, Download } from 'lucide-react';
 import { Product } from '@/types';
 import { generateProductImage } from '@/lib/gemini';
+import { useCart } from '@/contexts/CartContext';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { addItem } = useCart();
   const [imageSrc, setImageSrc] = useState<string>(product.image || '');
   const [isGenerating, setIsGenerating] = useState<boolean>(!product.image);
   const [isAiGenerated, setIsAiGenerated] = useState<boolean>(false);
@@ -200,7 +201,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
 
           {/* Action Button */}
           <button
-            onClick={() => onAddToCart(product)}
+            onClick={() => addItem(product)}
             className="w-full py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-brand-600 hover:shadow-lg hover:shadow-brand-500/20 transition-all duration-300 flex items-center justify-center gap-2 group/btn"
           >
             <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />

@@ -7,38 +7,66 @@ import { Footer } from '@/components/layout/Footer';
 import BlackNovemberHero from '@/components/home/BlackNovemberHero';
 import { CategoryBar } from '@/components/home/CategoryBar';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { SAMPLE_PRODUCTS } from '@/lib/constants';
-import { Product } from '@/types';
+import { useProducts, useProductSearch } from '@/hooks/useProducts';
+import { useCart } from '@/contexts/CartContext';
+import { CartSidebar } from '@/components/cart/CartSidebar';
 
 export default function Home() {
-  const [cartCount, setCartCount] = useState(0);
+  const { state: cartState, toggleCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const handleAddToCart = (product: Product) => {
-    setCartCount((prev) => prev + 1);
+  const {
+    products,
+    categories,
+    loading: productsLoading,
+    error: productsError,
+  } = useProducts();
 
-    // Notification logic
-    const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl z-50 animate-bounce flex items-center gap-2';
-    notification.innerHTML = `<span>Added <span class="font-bold text-brand-500">${product.name}</span> to cart!</span>`;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 2000);
+  const {
+    results: searchResults,
+    search,
+    clearResults,
+  } = useProductSearch();
+
+  // Use search results if there's a query, otherwise use all products
+  const displayProducts = searchQuery.trim() ? searchResults : products;
+
+  // Filter by selected category
+  const categoryFilteredProducts = selectedCategory === 'All'
+    ? displayProducts
+    : displayProducts.filter(product =>
+        product.category.toLowerCase() === selectedCategory.toLowerCase()
+      );
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      search(query);
+    } else {
+      clearResults();
+    }
   };
 
-  const filteredProducts = SAMPLE_PRODUCTS.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Handle category selection
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    // Trigger new search if there's a query
+    if (searchQuery.trim()) {
+      search(searchQuery);
+    }
+  };
+
+  const title = selectedCategory === 'All' ? 'Featured Products' : `${selectedCategory} Products`;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <TopBar />
       <Navbar
-        cartCount={cartCount}
+        cartCount={cartState.totalItems}
         searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        setSearchQuery={handleSearch}
       />
 
       <main className="flex-grow">
@@ -48,27 +76,38 @@ export default function Home() {
         {/* Standard Shop Components */}
         <CategoryBar
           selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
+          onSelectCategory={handleCategorySelect}
+          categories={categories}
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              {selectedCategory === 'All' ? 'Featured Products' : `${selectedCategory} Products`}
+              {title}
             </h2>
-            <span className="text-gray-500 text-sm">
-              {filteredProducts.length} items found
-            </span>
+            {productsLoading ? (
+              <span className="text-gray-500 text-sm">Loading products...</span>
+            ) : (
+              <span className="text-gray-500 text-sm">
+                {categoryFilteredProducts.length} items found
+              </span>
+            )}
           </div>
 
-          <ProductGrid
-            products={filteredProducts}
-            onAddToCart={handleAddToCart}
-          />
+          {productsError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+              <p>Error loading products: {productsError}</p>
+            </div>
+          )}
+
+          <ProductGrid products={categoryFilteredProducts} loading={productsLoading} />
         </div>
       </main>
 
       <Footer />
+
+      {/* Cart Sidebar */}
+      <CartSidebar isOpen={cartState.isOpen} onClose={toggleCart} />
     </div>
   );
 }

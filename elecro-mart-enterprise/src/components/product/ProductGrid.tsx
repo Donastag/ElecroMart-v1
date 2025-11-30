@@ -6,10 +6,10 @@ import { Product } from '@/types';
 
 interface ProductGridProps {
   products: Product[];
-  onAddToCart: (product: Product) => void;
+  loading?: boolean;
 }
 
-export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart }) => {
+export const ProductGrid: React.FC<ProductGridProps> = ({ products, loading = false }) => {
   if (products.length === 0) {
     return (
       <div className="text-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm">
@@ -23,7 +23,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-700 slide-in-from-bottom-4">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
+        <ProductCard key={product.id} product={product} />
       ))}
     </div>
   );

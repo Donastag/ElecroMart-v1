@@ -1,13 +1,22 @@
 export interface Product {
-  id: number;
+  id: number | string;
   name: string;
   price: string;
   originalPrice?: string;
-  image: string;
+  image?: string; // Made optional for AI-generated images
   category: string;
   rating: number;
   reviews: number;
   isNew?: boolean;
+  description?: string;
+  shortDescription?: string;
+  sku?: string;
+  inventoryCount?: number;
+  tags?: string[];
+  specifications?: any;
+  isActive?: boolean;
+  isFeatured?: boolean;
+  slug?: string;
 }
 
 export interface CartItem {
@@ -48,7 +57,13 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
-  image?: string;
+  parentId?: string;
+  imageUrl?: string;
+  icon?: string;
+  sortOrder: number;
+  isActive: boolean;
+  isFeatured: boolean;
+  productCount: number;
 }
 
 export interface AIModel {
