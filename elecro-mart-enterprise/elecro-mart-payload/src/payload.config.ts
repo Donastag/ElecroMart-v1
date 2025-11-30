@@ -1,5 +1,6 @@
 // storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
+// import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 // Check if database is properly configured
 const isDatabaseConfigured = () => {
@@ -46,15 +47,10 @@ export default buildConfig({
     user: Users.slug,
   },
   collections: [Users, Pages, Categories, Media],
+  // Minimal database config for development (will be replaced by Railway in production)
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || 'postgresql://dummy:dummy@localhost:5432/dummy',
-      // Add connection timeout and retry settings
-      connectionTimeoutMillis: 5000,
-      query_timeout: 10000,
-      idleTimeoutMillis: 30000,
-      max: 10,
-      min: 0,
+      connectionString: 'postgresql://dummy:dummy@localhost:5432/dummy',
     },
   }),
   editor: lexicalEditor({
