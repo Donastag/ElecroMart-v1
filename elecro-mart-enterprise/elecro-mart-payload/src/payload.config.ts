@@ -1,5 +1,5 @@
-// storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { s3Adapter } from '@payloadcms/storage-s3'
 // import { sqliteAdapter } from '@payloadcms/db-sqlite'
 
 // Check if database is properly configured
@@ -50,7 +50,7 @@ export default buildConfig({
   // Minimal database config for development (will be replaced by Railway in production)
   db: postgresAdapter({
     pool: {
-      connectionString: 'postgresql://dummy:dummy@localhost:5432/dummy',
+      connectionString: process.env.DATABASE_URI || 'postgresql://dummy:dummy@localhost:5432/dummy',
     },
   }),
   editor: lexicalEditor({
@@ -93,7 +93,20 @@ export default buildConfig({
   globals: [Header, Footer],
   plugins: [
     ...plugins,
-    // storage-adapter-placeholder
+    s3Adapter({
+      config: {
+        endpoint: process.env.S3_ENDPOINT,
+        region: process.env.S3_REGION || 'auto',
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+        },
+      },
+      bucket: process.env.S3_BUCKET,
+      collections: {
+        [Media.slug]: true,
+      },
+    }),
   ],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
